@@ -43,7 +43,7 @@ jobs:
         if: {% raw %}${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}{% endraw %}
         with:
           publish_branch: gh-pages
-          github_token: {% raw }${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          github_token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
           publish_dir: docs/_build/html/
           # force_orphan: true
 
