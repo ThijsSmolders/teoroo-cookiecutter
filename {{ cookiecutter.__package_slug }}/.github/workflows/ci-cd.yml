@@ -40,7 +40,7 @@ jobs:
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        if: {% raw %}${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}{% endraw %}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
     needs: ci
 
     # Only run this job if new work is pushed to "main"
-    if: {% raw %}github.event_name == 'push' && github.ref == 'refs/heads/main'{% endraw %}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     # Set up operating system
     runs-on: ubuntu-latest
