@@ -1,3 +1,7 @@
+# This is a basic workflow for continuous integration and deployment of {{ cookiecutter.__package_slug }}
+
+# Name of the workflow
+
 name: ci-cd
 
 on: [push, pull_request]
@@ -9,13 +13,13 @@ jobs:
 
     # Define job steps
     steps:
-      - name: Set up Python
+      - name: Set up Python "{{ cookiecutter.python_version }}"
         uses: actions/setup-python@v2
         with:
           python-version: "{{ cookiecutter.python_version }}"
 
       - name: Check-out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install poetry
         uses: snok/install-poetry@v1
@@ -33,6 +37,15 @@ jobs:
 
       - name: Build documentation
         run: poetry run make html --directory docs/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html/
+          # force_orphan: true
 
   cd:
     # Only run this job if the "ci" job passes
@@ -52,7 +65,7 @@ jobs:
           python-version: "{{ cookiecutter.python_version }}"
 
       - name: Check-out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -71,22 +84,22 @@ jobs:
             git config user.email github-actions@github.com
             poetry run semantic-release publish
 
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: {% raw %}${{ secrets.TEST_PYPI_API_TOKEN }}{% endraw %}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish to TestPyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     user: __token__
+      #     password: {% raw %}${{ secrets.TEST_PYPI_API_TOKEN }}{% endraw %}
+      #     repository_url: https://test.pypi.org/legacy/
 
-      - name: Test install from TestPyPI
-        run: |
-            pip install \
-            --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            {{ cookiecutter.__package_slug }}
+      # - name: Test install from TestPyPI
+      #   run: |
+      #       pip install \
+      #       --index-url https://test.pypi.org/simple/ \
+      #       --extra-index-url https://pypi.org/simple \
+      #       {{ cookiecutter.__package_slug }}
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: {% raw %}${{ secrets.PYPI_API_TOKEN }}{% endraw %}
+      # - name: Publish to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     user: __token__
+      #     password: {% raw %}${{ secrets.PYPI_API_TOKEN }}{% endraw %}
